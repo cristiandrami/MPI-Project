@@ -1,0 +1,1 @@
+mpic++ nomeFile -lallegro -lallegro_main -lallegro_primitives
