@@ -7,7 +7,7 @@
 #include<iostream>
 
 #define numSteps 2
-const double minValue=0.98;
+const double minValue=0.9;
 const unsigned minNearbyLivingCells=2;
 #define totalSize 300
 
@@ -39,10 +39,10 @@ bool iced(int **porzioneCorrente,int i, int j, int portionSize)
     if(j-1>=0 && porzioneCorrente[i][j-1]==ICE)
        return true;
     
-    if(j+1<portionSize && porzioneCorrente[i][j+1]==ICE)
+    if(j+1<totalSize && porzioneCorrente[i][j+1]==ICE)
        return true;
 
-    if(i+1<portionSize && porzioneCorrente[i+1][j]==ICE)
+    if(i+1<=portionSize && porzioneCorrente[i+1][j]==ICE)
        return true;
 
     if(i-1>=0 && porzioneCorrente[i-1][j]==ICE)
@@ -63,17 +63,18 @@ void moveGas(int **porzioneCorrente,int i, int j, int **generazioneFutura, int p
     //mi creo un valore pari a 0.23 e cerco di spostare il gas prima a sinistra, poi destra, su e giu, sempre se posso
     float newValue=(float)rand()/(float)RAND_MAX;
 
-    std::cout<<newValue<<"valore";
+    //std::cout<<newValue<<"valore";
 
     // se non posso perchè sforo o non è libera provo a metterlo a destra cambiando il newValue in modo da entrare nel''altro if
     while(count<=5)
     {
         if(newValue<=0.25)
         {
-            if(j-1>=0 && porzioneCorrente[i][j-1]==EMPTY)
+            if(j-3>0 && porzioneCorrente[i][j-3]==EMPTY)
             {
-                generazioneFutura[i][j-1]=GAS;
-                generazioneFutura[i][j]=EMPTY;
+                generazioneFutura[i][j-2]=GAS;
+                porzioneCorrente[i][j-3]=GAS;
+                porzioneCorrente[i][j]=EMPTY;
                 return;
 
             }
@@ -92,11 +93,16 @@ void moveGas(int **porzioneCorrente,int i, int j, int **generazioneFutura, int p
         // se non posso perchè sforo o non è libera provo a metterlo a in alto cambiando il newValue in modo da entrare nel''altro if
         if(newValue>0.25 && newValue<=0.50)
         {
-            if(j+1<portionSize && porzioneCorrente[i][j+1]==EMPTY)
+            if(j+3<totalSize && porzioneCorrente[i][j+3]==EMPTY)
             {
+    
+                
             
-                generazioneFutura[i][j+1]=GAS;
-                generazioneFutura[i][j]=EMPTY;
+                generazioneFutura[i][j+3]=GAS;
+                porzioneCorrente[i][j+3]=GAS;
+                porzioneCorrente[i][j]=EMPTY;
+                
+               
                 return;
 
             }
@@ -115,10 +121,13 @@ void moveGas(int **porzioneCorrente,int i, int j, int **generazioneFutura, int p
         // se non posso perchè sforo o non è libera provo a metterlo a in basso cambiando il newValue in modo da entrare nel''altro if
         if(newValue>0.50 && newValue<=0.75)
         {
-            if(i+1<portionSize && porzioneCorrente[i+1][j]==EMPTY)
+            if(i+3<portionSize && porzioneCorrente[i+3][j]==EMPTY)
             {
                 generazioneFutura[i+1][j]=GAS;
-                generazioneFutura[i][j]=EMPTY;
+                porzioneCorrente[i+3][j]=GAS;
+                porzioneCorrente[i][j]=EMPTY;
+                
+                
                 return;
 
             }
@@ -138,11 +147,14 @@ void moveGas(int **porzioneCorrente,int i, int j, int **generazioneFutura, int p
 
         if(newValue>0.75 && newValue<=1)
         {
-            if(i-1>=0 && porzioneCorrente[i-1][j]==EMPTY)
+            if(i-3>0 && porzioneCorrente[i-3][j]==EMPTY)
             {
             
-                generazioneFutura[i-1][j]=GAS;
-                generazioneFutura[i][j]=EMPTY;
+                generazioneFutura[i-3][j]=GAS;
+                porzioneCorrente[i-3][j]=GAS;
+                porzioneCorrente[i][j]=EMPTY;
+                
+               
                 return;
             } 
             else
@@ -176,13 +188,17 @@ void refactCell(int **porzioneCorrente, int **generazioneFutura, int i, int j, i
     case GAS:
             //se è GAS vedo se ha vicino una cella ghiacciata, se si si ghiaccia anche lei;
             if(iced(porzioneCorrente, i, j, portionSize))
-                generazioneFutura[i][j]=ICE;
-            
+            {
+                //generazioneFutura[i][j]=ICE;
+                porzioneCorrente[i][j]=ICE;
 
+            }
             //ora sposto le particelle di gas;
             else
-            moveGas(porzioneCorrente, i, j,generazioneFutura, portionSize);
-
+            {
+                moveGas(porzioneCorrente, i, j,generazioneFutura, portionSize);
+            }
+            
             
 
 
@@ -192,6 +208,7 @@ void refactCell(int **porzioneCorrente, int **generazioneFutura, int i, int j, i
     default:
         //rimane com'è
         generazioneFutura[i][j] = porzioneCorrente[i][j];
+
         break;
     }
 }
@@ -272,27 +289,39 @@ void drawMap(int **map)
     {
         for (int j=0; j<totalSize; j++)
         {
+           // std::cout<<map[i][j];
+
+            
             switch (map[i][j])
             {
             case EMPTY:
-                al_draw_filled_rectangle(i * 3, j * 3, i * 3+3, j * 3+3, al_map_rgb(0, 0, 0));
+                al_draw_filled_rectangle(j * 3, i * 3, j * 3+3, i * 3+3, al_map_rgb(0, 0, 0));
                 break;
 
             case ICE:
-                al_draw_filled_rectangle(i * 3, j * 3, i * 3+3, j * 3+3, al_map_rgb(0,139,139));
+                al_draw_filled_rectangle(j * 3, i * 3, j * 3+3, i * 3+3, al_map_rgb(0,139,139));
 
                 //std::cout<<i<<" "<<j<<std::endl;
                 break;
 
             case GAS:
-                al_draw_filled_rectangle(i * 3, j * 3, i *3+3, j * 3+3, al_map_rgb(255,255,0));
+                al_draw_filled_rectangle(j * 3, i * 3, j * 3+3, i * 3+3, al_map_rgb(255,255,0));
                 break;
+
+            default:
+            al_draw_filled_rectangle(j * 3, i * 3, j * 3+3, i * 3+3, al_map_rgb(0, 0, 0));
+                break;
+
             }
+            
         }
+       // std::cout<<"\n";
     }
 
+    //std::cout<<"\n\n\n\n\n";
+
     al_flip_display();
-    al_rest(0.2);
+    al_rest(0.3);
 }
 
 int main(int argc, char** argv)
@@ -328,7 +357,7 @@ int main(int argc, char** argv)
     portionSize=totalSize/(numProc-1);
 
 
-    std::cout<<"initial portion "<<portionSize<<std::endl;
+    //std::cout<<"initial portion "<<portionSize<<std::endl;
 
 
     //ora  posso crearmi le sotto matrici di supporto che userò per inviare le parti ai vari processi
@@ -423,12 +452,19 @@ int main(int argc, char** argv)
                 portionCount += portionSize;
             }
 
-
+           /* for(int i=0; i<totalSize; i++)
+            {
+                for(int j=0; j<totalSize; j++)
+                {}
+                
+            }
+            std::cout<<"\n\n\n\n\n";
+            */
             //disegno la mappa con allegro
             drawMap(map);
 
 
-            std::cout<<"ho stampato la mappa\n";
+            //std::cout<<"ho stampato la mappa\n";
 
 
             //qui ricevo da ogni processo la matrice modificata
@@ -437,7 +473,7 @@ int main(int argc, char** argv)
             for (int j=1; j < numProc; j++)
             {
 
-                std::cout<<j<<std::endl;
+               // std::cout<<j<<std::endl;
                 //prendo tutte le righe che devo ricevere
                 for (int k=0; k<portionSize; k++)
                 {
@@ -448,7 +484,7 @@ int main(int argc, char** argv)
                     
                 }
 
-                std::cout<<"ho ricevuto dal processo "<<j<<std::endl;
+                //std::cout<<"ho ricevuto dal processo "<<j<<std::endl;
 
                 portionCount += portionSize;
             }
@@ -479,14 +515,14 @@ int main(int argc, char** argv)
         {
              MPI_Recv(&continueAutoma, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, &status);
 
-            std::cout<<"ho ricevuto dal processo 0 continue automa, sono "<<rank<<std::endl;
+           // std::cout<<"ho ricevuto dal processo 0 continue automa, sono "<<rank<<std::endl;
             
 
             for (int j=0; j<portionSize; j++)
             {
                 MPI_Recv(&(portionMatrix[j][0]), totalSize, MPI_INT, 0, 1, MPI_COMM_WORLD, &status);
             }
-            std::cout<<"ho ricevuto dal processo 0 la parte di matrice, sono "<<rank<<std::endl;
+          //  std::cout<<"ho ricevuto dal processo 0 la parte di matrice, sono "<<rank<<std::endl;
 
             if((numProc-1)!=1)
             {
@@ -498,9 +534,9 @@ int main(int argc, char** argv)
 
                 //aspetto che lo scambio sia eseguito 
                 MPI_Wait(&bottomSendRequest, &status);
-                std::cout<<"ho inviat dal processo"<<rank+1<<" il bordo inferiore, sono "<<rank<<std::endl;
+              //  std::cout<<"ho inviat dal processo"<<rank+1<<" il bordo inferiore, sono "<<rank<<std::endl;
                 MPI_Wait(&bottomRecvRequest, &status);
-                std::cout<<"ho ricevuto dal processo"<<rank+1<<" il bordo inferiore, sono "<<rank<<std::endl;
+              //  std::cout<<"ho ricevuto dal processo"<<rank+1<<" il bordo inferiore, sono "<<rank<<std::endl;
 
                 
 
@@ -511,21 +547,35 @@ int main(int argc, char** argv)
 
 
             //per pgni riga esclusa la prima e l'ultima che sono arrivate da altri precedente vado a modificare le celle
-            for (int j=1; j<portionSize; j++)
+            for (int j=0; j<portionSize; j++)
+            {
                 for (int k=0; k<totalSize;k++)
-                refactCell(portionMatrix, futureMatrix, j, k, portionSize);
+                {
+                   // std::cout<<portionMatrix[j][k]<<" ";
+                    refactCell(portionMatrix, futureMatrix, j, k, portionSize);
                     
 
-                    std::cout<<"portion "<<portionSize<<std::endl;
+                }
+                //std::cout<<"\n";
+
+            }
+
+            //std::cout<<"\n\n\n\n";
+            
+                
+                
+                    
+
+            //   std::cout<<"portion "<<portionSize<<std::endl;
 
             //spedisco le celle modificate al processo 0 
             for (int j=0; j<portionSize; j++)
             {
-                std::cout<<portionSize;
-                MPI_Send(&(futureMatrix[j][0]), totalSize, MPI_INT, 0, 4, MPI_COMM_WORLD);
+                //std::cout<<portionSize;
+                MPI_Send(&(portionMatrix[j][0]), totalSize, MPI_INT, 0, 4, MPI_COMM_WORLD);
             }
 
-            std::cout<<"ho inviato al processo 0 la matrice, sono "<<rank<<std::endl;
+            //std::cout<<"ho inviato al processo 0 la matrice, sono "<<rank<<std::endl;
         }
            
     
@@ -539,7 +589,7 @@ int main(int argc, char** argv)
         while(continueAutoma==1)
         {
             MPI_Recv(&continueAutoma, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, &status);
-            std::cout<<"ho ricevuto dal processo 0 continue automa, sono "<<rank<<std::endl;
+           // std::cout<<"ho ricevuto dal processo 0 continue automa, sono "<<rank<<std::endl;
 
             for (int j=1; j<portionSize+1; j++)
             {
@@ -547,7 +597,7 @@ int main(int argc, char** argv)
             }
 
             
-            std::cout<<"ho ricevuto dal processo 0 la parte di matrice, sono "<<rank<<std::endl;
+           // std::cout<<"ho ricevuto dal processo 0 la parte di matrice, sono "<<rank<<std::endl;
 
             //spedisco al processo precedente la mia parte superiore
             MPI_Isend(&(portionMatrix[1][0]), totalSize, MPI_INT, rank-1, 3, MPI_COMM_WORLD, &topSendRequest);
@@ -556,27 +606,36 @@ int main(int argc, char** argv)
             MPI_Irecv(&(portionMatrix[0][0]), totalSize, MPI_INT, rank-1, 2, MPI_COMM_WORLD, &topRecvRequest);
 
             MPI_Wait(&topSendRequest, &status);
-            std::cout<<"ho inviato al processo "<<rank-1<<" il bordo superiore, sono "<<rank<<std::endl;
+            //std::cout<<"ho inviato al processo "<<rank-1<<" il bordo superiore, sono "<<rank<<std::endl;
             MPI_Wait(&topRecvRequest, &status);
-            std::cout<<"ho ricevuto dal processo "<<rank-1<<" il bordo superiore, sono "<<rank<<std::endl;
+            //std::cout<<"ho ricevuto dal processo "<<rank-1<<" il bordo superiore, sono "<<rank<<std::endl;
 
 
             
             
-            //parto sempre dalla prima riga di mia proprità e arrivo questa volta proprio all'ultima 
             for (int j=1; j<portionSize+1; j++)
-                for (int k = 0; k < totalSize; k++)
+            {
+                for (int k=0; k<totalSize;k++)
+                {
+                    //std::cout<<portionMatrix[j][k]<<" ";
                     refactCell(portionMatrix, futureMatrix, j, k, portionSize);
+                    
+
+                }
+                //std::cout<<"\n";
+
+            }
+            //break;
                    
 
 
             //spedisco le celle modificate al processo 0;
             for (int j=1; j<portionSize+1; j++)
             {
-                MPI_Send(&(futureMatrix[j][0]), totalSize, MPI_INT, 0, 4, MPI_COMM_WORLD);
+                MPI_Send(&(portionMatrix[j][0]), totalSize, MPI_INT, 0, 4, MPI_COMM_WORLD);
             }
 
-            std::cout<<"ho inviato al processo 0 la matrice, sono "<<rank<<std::endl;
+            //std::cout<<"ho inviato al processo 0 la matrice, sono "<<rank<<std::endl;
 
         }
 
@@ -592,13 +651,13 @@ int main(int argc, char** argv)
         while(continueAutoma==1)
         {
             MPI_Recv(&continueAutoma, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, &status);
-            std::cout<<"ho ricevuto dal processo 0 continue automa, sono "<<rank<<std::endl;
+            //std::cout<<"ho ricevuto dal processo 0 continue automa, sono "<<rank<<std::endl;
 
             for (int j = 1; j < portionSize+1; j++)
             {
                 MPI_Recv(&(portionMatrix[j][0]), totalSize, MPI_INT, 0, 1, MPI_COMM_WORLD, &status);
             }
-            std::cout<<"ho ricevuto dal processo 0 la parte di matrice, sono "<<rank<<std::endl;
+            //std::cout<<"ho ricevuto dal processo 0 la parte di matrice, sono "<<rank<<std::endl;
 
 
             //invio il bordo superiore
@@ -614,29 +673,29 @@ int main(int argc, char** argv)
             MPI_Irecv(&(portionMatrix[portionSize+1][0]), totalSize, MPI_INT, rank+1, 3, MPI_COMM_WORLD, &bottomRecvRequest);
 
             MPI_Wait(&topSendRequest, &status);
-            std::cout<<"ho inviato al processo "<<rank-1<<" il bordo superiore, sono "<<rank<<std::endl;
+            //std::cout<<"ho inviato al processo "<<rank-1<<" il bordo superiore, sono "<<rank<<std::endl;
             MPI_Wait(&bottomSendRequest, &status);
-            std::cout<<"ho inviato al processo "<<rank-1<<" il bordo inferiore, sono "<<rank<<std::endl;
+            //std::cout<<"ho inviato al processo "<<rank-1<<" il bordo inferiore, sono "<<rank<<std::endl;
             MPI_Wait(&topRecvRequest, &status);
-            std::cout<<"ho ricevuto dal processo "<<rank-1<<" il bordo superiore, sono "<<rank<<std::endl;
+            //std::cout<<"ho ricevuto dal processo "<<rank-1<<" il bordo superiore, sono "<<rank<<std::endl;
             MPI_Wait(&bottomRecvRequest, &status);
-            std::cout<<"ho ricevuto al processo "<<rank-1<<" il bordo inferiore, sono "<<rank<<std::endl;
+            //std::cout<<"ho ricevuto al processo "<<rank-1<<" il bordo inferiore, sono "<<rank<<std::endl;
 
 
             //in questo caso mi tocca vedere dal bordo superiore(tolta la riga ricevuta) fino al bordo inferiore(tolta la riga ricevuta)
             for (int j=1; j<portionSize+1;j++)
-                for (int k=0; k< portionSize; k++)
+                for (int k=0; k< totalSize; k++)
                     refactCell(portionMatrix, futureMatrix, j, k, portionSize);
                     
                     
 
             //invio la matrice modificata
-            for (int j= 1; j< portionSize+1; j++)
+            for (int j=1; j< portionSize+1; j++)
             {
-                MPI_Send(&(futureMatrix[j][0]), totalSize, MPI_INT, 0, 4, MPI_COMM_WORLD);
+                MPI_Send(&(portionMatrix[j][0]), totalSize, MPI_INT, 0, 4, MPI_COMM_WORLD);
             }
 
-            std::cout<<"ho inviato al processo 0 la matrice, sono "<<rank<<std::endl;
+            //std::cout<<"ho inviato al processo 0 la matrice, sono "<<rank<<std::endl;
 
         }
             
