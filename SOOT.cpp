@@ -55,7 +55,7 @@ bool iced(int **porzioneCorrente,int i, int j, int portionSize)
 
 }
 
-void moveGas(int **porzioneCorrente,int i, int j, int **generazioneFutura, int portionSize)
+void moveGas(int **porzioneCorrente,int i, int j, int portionSize)
 {
 
     int count=0;
@@ -72,7 +72,7 @@ void moveGas(int **porzioneCorrente,int i, int j, int **generazioneFutura, int p
         {
             if(j-3>0 && porzioneCorrente[i][j-3]==EMPTY)
             {
-                generazioneFutura[i][j-2]=GAS;
+               
                 porzioneCorrente[i][j-3]=GAS;
                 porzioneCorrente[i][j]=EMPTY;
                 return;
@@ -98,7 +98,7 @@ void moveGas(int **porzioneCorrente,int i, int j, int **generazioneFutura, int p
     
                 
             
-                generazioneFutura[i][j+3]=GAS;
+               
                 porzioneCorrente[i][j+3]=GAS;
                 porzioneCorrente[i][j]=EMPTY;
                 
@@ -123,7 +123,7 @@ void moveGas(int **porzioneCorrente,int i, int j, int **generazioneFutura, int p
         {
             if(i+3<portionSize && porzioneCorrente[i+3][j]==EMPTY)
             {
-                generazioneFutura[i+1][j]=GAS;
+                
                 porzioneCorrente[i+3][j]=GAS;
                 porzioneCorrente[i][j]=EMPTY;
                 
@@ -150,7 +150,7 @@ void moveGas(int **porzioneCorrente,int i, int j, int **generazioneFutura, int p
             if(i-3>0 && porzioneCorrente[i-3][j]==EMPTY)
             {
             
-                generazioneFutura[i-3][j]=GAS;
+                
                 porzioneCorrente[i-3][j]=GAS;
                 porzioneCorrente[i][j]=EMPTY;
                 
@@ -173,14 +173,11 @@ void moveGas(int **porzioneCorrente,int i, int j, int **generazioneFutura, int p
 
     //se sono entrato nei quattro if allora mi trovo in una situazione ciclica in cui ho le celle su,sotto,destra,sinistra occupate
     //aallora la lascio dov'è
-    //generazioneFutura[i][j]=porzioneCorrente[i][j];
-   
-
 
 
 }
 //con questa funzione vado ad applicare proprio le regole del gioco in base ad ogni cella e ai suoi vicini
-void refactCell(int **porzioneCorrente, int **generazioneFutura, int i, int j, int portionSize)
+void refactCell(int **porzioneCorrente, int i, int j, int portionSize)
 {
     switch (porzioneCorrente[i][j])
     {
@@ -189,14 +186,14 @@ void refactCell(int **porzioneCorrente, int **generazioneFutura, int i, int j, i
             //se è GAS vedo se ha vicino una cella ghiacciata, se si si ghiaccia anche lei;
             if(iced(porzioneCorrente, i, j, portionSize))
             {
-                //generazioneFutura[i][j]=ICE;
+                
                 porzioneCorrente[i][j]=ICE;
 
             }
             //ora sposto le particelle di gas;
             else
             {
-                moveGas(porzioneCorrente, i, j,generazioneFutura, portionSize);
+                moveGas(porzioneCorrente, i, j, portionSize);
             }
             
             
@@ -207,7 +204,7 @@ void refactCell(int **porzioneCorrente, int **generazioneFutura, int i, int j, i
 
     default:
         //rimane com'è
-        generazioneFutura[i][j] = porzioneCorrente[i][j];
+       
 
         break;
     }
@@ -368,14 +365,6 @@ int main(int argc, char** argv)
         portionMatrix[i] = new int[totalSize];
     }
 
-
-    
-    //questa mi serve per gestire le regole sulla nuova matrice (mappa)
-    int **futureMatrix = new int *[totalSize];
-    for (int i=0; i<totalSize; i++)
-    {
-        futureMatrix[i] = new int[totalSize];
-    }
 
 
 
@@ -552,7 +541,7 @@ int main(int argc, char** argv)
                 for (int k=0; k<totalSize;k++)
                 {
                    // std::cout<<portionMatrix[j][k]<<" ";
-                    refactCell(portionMatrix, futureMatrix, j, k, portionSize);
+                    refactCell(portionMatrix, j, k, portionSize);
                     
 
                 }
@@ -618,7 +607,7 @@ int main(int argc, char** argv)
                 for (int k=0; k<totalSize;k++)
                 {
                     //std::cout<<portionMatrix[j][k]<<" ";
-                    refactCell(portionMatrix, futureMatrix, j, k, portionSize);
+                    refactCell(portionMatrix, j, k, portionSize);
                     
 
                 }
@@ -685,7 +674,7 @@ int main(int argc, char** argv)
             //in questo caso mi tocca vedere dal bordo superiore(tolta la riga ricevuta) fino al bordo inferiore(tolta la riga ricevuta)
             for (int j=1; j<portionSize+1;j++)
                 for (int k=0; k< totalSize; k++)
-                    refactCell(portionMatrix, futureMatrix, j, k, portionSize);
+                    refactCell(portionMatrix, j, k, portionSize);
                     
                     
 
@@ -712,12 +701,7 @@ int main(int argc, char** argv)
     }
     delete[] portionMatrix;
 
-    for (int i=0; i<totalSize; i++)
-    {
-        delete[] futureMatrix[i];
-    }
-    delete[] futureMatrix;
-
+    
     MPI_Finalize();
 
     
