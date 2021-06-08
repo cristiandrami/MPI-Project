@@ -1,1 +1,0 @@
-mpic++ SOOT -lallegro -lallegro_main -lallegro_primitives
